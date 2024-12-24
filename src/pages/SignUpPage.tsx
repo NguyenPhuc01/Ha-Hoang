@@ -41,6 +41,13 @@ const SignUpPage = () => {
     e.preventDefault();
     const isValidateForm = validateForm();
     if (isValidateForm === true) {
+      try {
+        setIsSigningUp(true);
+      } catch (error) {
+        console.log("🚀 ~ handleSubmit ~ error:", error);
+      } finally {
+        setIsSigningUp(false);
+      }
       console.log(formData);
     }
   };
