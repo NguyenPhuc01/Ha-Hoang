@@ -10,9 +10,70 @@ const CheckInPage = () => {
   const [timeCheckIn, setTimeCheckIn] = useState("");
   const scanningRef = useRef(false);
   const showDialogSuccess = useRef<HTMLDialogElement>(null);
+  const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
   const { setLoading } = useLoading();
+  useEffect(() => {
+    requestPermissions();
+  }, []);
+
+  const requestPermissions = async () => {
+    try {
+      // Kiểm tra quyền truy cập camera
+      const cameraPermission = await navigator.permissions.query({
+        name: "camera" as PermissionName,
+      });
+
+      // Kiểm tra quyền truy cập vị trí
+      const locationPermission = await navigator.permissions.query({
+        name: "geolocation",
+      });
+
+      if (
+        cameraPermission.state === "granted" &&
+        locationPermission.state === "granted"
+      ) {
+        setCameraPermissionGranted(true);
+        console.log("Camera and geolocation permissions granted");
+      } else {
+        setCameraPermissionGranted(false);
+        console.log("Camera and/or geolocation permissions not granted");
+      }
+
+      // Yêu cầu quyền truy cập camera nếu chưa được cấp
+      if (cameraPermission.state !== "granted") {
+        const cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+        cameraStream.getTracks().forEach((track) => track.stop());
+      }
+
+      // Yêu cầu quyền truy cập vị trí nếu chưa được cấp
+      if (locationPermission.state !== "granted") {
+        await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+      }
+
+      // Kiểm tra lại sau khi yêu cầu quyền
+      const finalCameraPermission = await navigator.permissions.query({
+        name: "camera" as PermissionName,
+      });
+      const finalLocationPermission = await navigator.permissions.query({
+        name: "geolocation",
+      });
+
+      setCameraPermissionGranted(
+        finalCameraPermission.state === "granted" &&
+          finalLocationPermission.state === "granted"
+      );
+    } catch (error) {
+      console.error("Error requesting permissions:", error);
+      setCameraPermissionGranted(false);
+    }
+  };
+
   const startScanning = async () => {
-    if (videoElement.current) {
+    if (videoElement.current && cameraPermissionGranted) {
       if (!qrScanner) {
         const scanner = new QrScanner(
           videoElement.current,
@@ -41,24 +102,6 @@ const CheckInPage = () => {
         }
       } catch (error) {
         console.error("Cannot access camera:", error);
-        return;
-      }
-
-      try {
-        const cameraPermission = await navigator.permissions.query({
-          name: "camera" as PermissionName,
-        });
-        if (cameraPermission.state === "granted") {
-          console.log("Camera access granted");
-        } else if (cameraPermission.state === "prompt") {
-          console.log("User has not decided on camera access yet");
-          return;
-        } else {
-          console.log("Camera access denied");
-          return;
-        }
-      } catch (permissionError) {
-        console.error("Cannot check camera permission:", permissionError);
         return;
       }
 
@@ -125,14 +168,20 @@ const CheckInPage = () => {
         {/* Button to start scanning */}
         {!scanning && (
           <div
-            className="w-[120px] h-[40px] flex justify-center items-center gap-x-1.5 mt-4 mt-md-[23px] mx-auto mx-md-0 text-center text-sm rounded-lg bg-[#FE771B] text-white font-semibold cursor-pointer"
+            className={`w-[120px] h-[40px] flex justify-center items-center gap-x-1.5 mt-4 mt-md-[23px] mx-auto mx-md-0 text-center text-sm rounded-lg bg-[#FE771B] text-white font-semibold cursor-pointer ${
+              !cameraPermissionGranted ? "cursor-not-allowed opacity-50" : ""
+            } `}
             onClick={startScanning}
           >
-            Checkin
+            Check-in
             <img src={cameraCheckIn} alt="camera" />
           </div>
         )}
-
+        {!cameraPermissionGranted && (
+          <div className="mt-3">
+            <span>Bạn chưa cấp quyền truy cập camera và vị trí</span>
+          </div>
+        )}
         {/* Button to stop scanning */}
         {scanning && (
           <div
