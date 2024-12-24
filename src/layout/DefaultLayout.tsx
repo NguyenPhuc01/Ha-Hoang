@@ -1,12 +1,30 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+
   const location = useLocation();
+  useEffect(() => {
+    const storedUserData = localStorage.getItem("userData");
+    if (storedUserData) {
+      try {
+        const parsedUserData = JSON.parse(storedUserData);
+
+        if (parsedUserData) {
+          navigate("/");
+        }
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    } else {
+      navigate("/login");
+    }
+  }, [navigate]);
   return (
     <div className="w-full h-screen">
       {location.pathname === "/login" || location.pathname === "/signup" ? (
