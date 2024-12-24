@@ -7,7 +7,7 @@ const Header = (props: {
   setSidebarOpen: (arg0: boolean) => void;
 }) => {
   return (
-    <header className="sticky top-0 z-[999] flex w-full bg-[#1C2434] drop-shadow-1 ">
+    <header className="sticky top-0 z-[999] flex w-full bg-base-200 drop-shadow-1  border-b border-b-base-300">
       <div className="flex flex-grow items-center justify-between lg:justify-end px-4 py-4 shadow-2 md:px-6 2xl:px-11">
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
           {/* <!-- Hamburger Toggle BTN --> */}
@@ -17,34 +17,34 @@ const Header = (props: {
               e.stopPropagation();
               props.setSidebarOpen(!props.sidebarOpen);
             }}
-            className="z-[99999] block rounded-sm border border-stroke bg-[#1C2434] p-1 shadow-sm  lg:hidden"
+            className="z-[99999] block rounded-sm border border-[#E2E8F0] bg-white p-1 shadow-sm dark:border-[#2E3A47] dark:bg-[#24303F] lg:hidden"
           >
             <span className="relative block h-5 w-5 cursor-pointer">
               <span className="du-block absolute right-0 h-full w-full">
                 <span
-                  className={`relative left-0 top-0 my-1 block h-1 w-0 rounded-sm bg-black delay-[0] duration-200 ease-in-out dark:bg-[#1C2434] ${
+                  className={`relative left-0 top-0  mb-1 block h-1 w-0 rounded-sm bg-[#24303F] delay-[0] duration-200 ease-in-out dark:bg-white ${
                     !props.sidebarOpen && "!w-full delay-300"
                   }`}
                 ></span>
                 <span
-                  className={`relative left-0 top-0 my-1 block h-1 w-0 rounded-sm bg-black delay-150 duration-200 ease-in-out dark:bg-[#1C2434] ${
+                  className={`relative left-0 top-0 my-1 block h-1 w-0 rounded-sm bg-[#24303F] delay-150 duration-200 ease-in-out dark:bg-white ${
                     !props.sidebarOpen && "delay-400 !w-full"
                   }`}
                 ></span>
                 <span
-                  className={`relative left-0 top-0 my-1 block h-1 w-0 rounded-sm bg-black delay-200 duration-200 ease-in-out dark:bg-[#1C2434] ${
+                  className={`relative left-0 top-0 my-1 block h-1 w-0 rounded-sm bg-[#24303F] delay-200 duration-200 ease-in-out dark:bg-white ${
                     !props.sidebarOpen && "!w-full delay-500"
                   }`}
                 ></span>
               </span>
               <span className="absolute right-0 h-full w-full rotate-45">
                 <span
-                  className={`absolute left-2 top-0 block h-full w-1 rounded-sm bg-black delay-300 duration-200 ease-in-out dark:bg-[#1C2434] ${
+                  className={`absolute left-2 top-0 block h-full w-1 rounded-sm bg-[#24303F] delay-300 duration-200 ease-in-out dark:bg-white ${
                     !props.sidebarOpen && "!h-0 !delay-[0]"
                   }`}
                 ></span>
                 <span
-                  className={`delay-400 absolute left-0 top-2 block h-1 w-full rounded-sm bg-black duration-200 ease-in-out dark:bg-[#1C2434] ${
+                  className={`delay-400 absolute left-0 top-2 block h-1 w-full rounded-sm bg-[#24303F] duration-200 ease-in-out dark:bg-white ${
                     !props.sidebarOpen && "!h-0 !delay-200"
                   }`}
                 ></span>
@@ -54,7 +54,7 @@ const Header = (props: {
           {/* <!-- Hamburger Toggle BTN --> */}
 
           <Link className="block flex-shrink-0 lg:hidden" to="/">
-            <img src={LogoIcon} alt="Logo" className="w-[30px] h-[30px] mt-1" />
+            <img src={LogoIcon} alt="Logo" className="w-[30px] h-[30px] " />
           </Link>
         </div>
 
