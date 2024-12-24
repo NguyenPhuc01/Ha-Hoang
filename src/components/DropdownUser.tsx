@@ -8,7 +8,7 @@ import { IUser } from "../util/auth.type";
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
-  const [userData, setUserData] = useState<IUser>();
+  const [userData, setUserData] = useState<IUser | null>();
   const handleLogout = async () => {
     console.log("logout");
     try {
@@ -22,13 +22,23 @@ const DropdownUser = () => {
       console.log(error);
     }
   };
-  console.log("🚀 ~ DropdownUser ~ userData:", userData);
 
   useEffect(() => {
-    // Retrieve user data from localStorage and update state
-    const storedUserData = JSON.parse(localStorage.getItem("userData") || "");
-    setUserData(storedUserData);
+    const storedUserData = localStorage.getItem("userData");
+
+    if (storedUserData) {
+      try {
+        const parsedUserData = JSON.parse(storedUserData);
+        setUserData(parsedUserData);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        setUserData(null);
+      }
+    } else {
+      setUserData(null);
+    }
   }, []);
+
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link

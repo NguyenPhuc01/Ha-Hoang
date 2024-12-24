@@ -32,9 +32,17 @@ const LoginPage = () => {
     return true;
   };
   useEffect(() => {
-    const checkUserLogin = JSON.parse(localStorage.getItem("userData") || "");
-    if (checkUserLogin) {
-      navigate("/");
+    const storedUserData = localStorage.getItem("userData");
+    if (storedUserData) {
+      try {
+        const parsedUserData = JSON.parse(storedUserData);
+
+        if (parsedUserData) {
+          navigate("/");
+        }
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
     }
   }, [navigate]);
 
