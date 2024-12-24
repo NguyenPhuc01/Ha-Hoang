@@ -248,9 +248,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </li>
               <li>
                 <NavLink
-                  to="/checkIn"
+                  to="/check-in"
                   className={`group relative flex items-center gap-2 rounded-sm py-2 px-4 font-medium  duration-300 ease-in-out hover:bg-grayDark dark:hover:bg-meta-4 ${
-                    pathname.includes("checkIn") && "bg-grayDark dark:bg-meta-4"
+                    pathname.includes("check-in") &&
+                    "bg-grayDark dark:bg-meta-4"
                   }`}
                 >
                   <svg

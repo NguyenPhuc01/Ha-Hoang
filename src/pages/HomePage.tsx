@@ -79,7 +79,7 @@ const HomePage = () => {
             {days.map((item, index) => {
               const reversedIndex = days.length - 1 - index;
               return (
-                <tr className="">
+                <tr className="" key={reversedIndex}>
                   <th></th>
                   <td>
                     <div className="flex items-center gap-3">

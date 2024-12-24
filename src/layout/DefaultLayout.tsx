@@ -11,17 +11,7 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const location = useLocation();
   useEffect(() => {
     const storedUserData = localStorage.getItem("userData");
-    if (storedUserData) {
-      try {
-        const parsedUserData = JSON.parse(storedUserData);
-
-        if (parsedUserData) {
-          navigate("/");
-        }
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-      }
-    } else {
+    if (!storedUserData) {
       navigate("/login");
     }
   }, [navigate]);

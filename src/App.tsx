@@ -5,22 +5,27 @@ import DefaultLayout from "./layout/DefaultLayout";
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
+import CheckInPage from "./pages/CheckInPage";
+import { LoadingProvider } from "./components/LoadingProvider";
 
 const App = () => {
   return (
-    <div data-theme={"dark"}>
-      <BrowserRouter>
-        <DefaultLayout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/signup" element={<SignUpPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            {/* Các Route khác ở đây */}
-          </Routes>
-        </DefaultLayout>
-        <Toaster />
-      </BrowserRouter>
-    </div>
+    <LoadingProvider>
+      <div data-theme={"dark"}>
+        <BrowserRouter>
+          <DefaultLayout>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/check-in" element={<CheckInPage />} />
+              <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              {/* Các Route khác ở đây */}
+            </Routes>
+          </DefaultLayout>
+          <Toaster />
+        </BrowserRouter>
+      </div>
+    </LoadingProvider>
   );
 };
 
