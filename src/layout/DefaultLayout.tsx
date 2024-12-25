@@ -11,10 +11,17 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const location = useLocation();
   useEffect(() => {
     const storedUserData = localStorage.getItem("userData");
+
     if (!storedUserData) {
-      navigate("/login");
+      if (location.pathname === "/signup") {
+        console.log("Navigating to Signup Page");
+        navigate("/signup");
+      } else {
+        console.log("Navigating to Login Page");
+        navigate("/login");
+      }
     }
-  }, [navigate]);
+  }, [navigate, location.pathname]);
   return (
     <div className="w-full h-screen">
       {location.pathname === "/login" || location.pathname === "/signup" ? (

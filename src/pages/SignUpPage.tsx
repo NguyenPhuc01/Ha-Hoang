@@ -8,9 +8,10 @@ import {
   MessageSquare,
   User,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { IDataSignup } from "../util/auth.type";
+import { axiosInstance } from "../lib/axios";
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +21,7 @@ const SignUpPage = () => {
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
   const validateForm = () => {
     if (!formData.fullName.trim()) {
       return toast.error("FullName is required");
@@ -37,14 +39,20 @@ const SignUpPage = () => {
       return toast.error("Invalid email format");
     return true;
   };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const isValidateForm = validateForm();
     if (isValidateForm === true) {
+      setIsSigningUp(true);
       try {
-        setIsSigningUp(true);
-      } catch (error) {
-        console.log("🚀 ~ handleSubmit ~ error:", error);
+        const res = await axiosInstance.post("auth/signup", formData);
+        if (res.status === 201) {
+          localStorage.setItem("userData", JSON.stringify(res.data));
+          toast.success("Account created successfully");
+          navigate("/");
+        }
+      } catch (error: any) {
+        toast.error(error.response.data.message);
       } finally {
         setIsSigningUp(false);
       }
