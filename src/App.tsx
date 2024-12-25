@@ -7,6 +7,7 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import CheckInPage from "./pages/CheckInPage";
 import { LoadingProvider } from "./components/LoadingProvider";
+import ProfilePage from "./pages/ProfilePage";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/check-in" element={<CheckInPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/login" element={<LoginPage />} />
               {/* Các Route khác ở đây */}

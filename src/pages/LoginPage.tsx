@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 import { IDataLogin } from "../util/auth.type";
@@ -55,6 +54,7 @@ const LoginPage = () => {
         const res = await axiosInstance.post("auth/login", formData);
         if (res.status === 201) {
           toast.success("Login successful");
+
           localStorage.setItem("userData", JSON.stringify(res.data));
           navigate("/");
         }

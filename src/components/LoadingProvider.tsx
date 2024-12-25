@@ -1,4 +1,10 @@
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+} from "react";
 import FullPageLoader from "./FullPageLoader";
 
 interface LoadingContextType {
@@ -23,7 +29,9 @@ export const LoadingProvider: React.FC<LoadingProviderProps> = ({
   children,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-
+  useEffect(() => {
+    console.log("check loading", isLoading);
+  }, [isLoading]);
   const setLoading = (loading: boolean) => {
     setIsLoading(loading);
   };

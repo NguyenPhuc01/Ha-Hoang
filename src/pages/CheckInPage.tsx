@@ -3,18 +3,41 @@ import QrScanner from "qr-scanner";
 import cameraCheckIn from "../assets/camera-checkin.svg";
 import checkInSuccess from "../assets/icon-checkin-success-blue.png";
 import { useLoading } from "../components/LoadingProvider";
+import { CheckInRecord } from "../util/home.type";
+import { axiosInstance } from "../lib/axios";
+import { useNavigate } from "react-router-dom";
 const CheckInPage = () => {
   const videoElement = useRef<HTMLVideoElement | null>(null);
   const [qrScanner, setQrScanner] = useState<QrScanner | null>(null);
   const [scanning, setScanning] = useState(false);
   const [timeCheckIn, setTimeCheckIn] = useState("");
   const scanningRef = useRef(false);
+  const [flagIndex, setFlagIndex] = useState(0);
   const showDialogSuccess = useRef<HTMLDialogElement>(null);
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
   const { setLoading } = useLoading();
+  const [dataCheckIn, setDataCheckIn] = useState<CheckInRecord[]>([]);
+  const navigate = useNavigate();
   useEffect(() => {
     requestPermissions();
+    getListCheckIn();
   }, []);
+  const getListCheckIn = async () => {
+    const userId = localStorage.getItem("userData");
+    if (userId) {
+      const res = await axiosInstance.get(
+        `check/listCheckIn/${JSON.parse(userId)._id}`
+      );
+      if (res.status === 200) {
+        console.log("🚀 ~ getListCheckIn ~ res:", res);
+        setDataCheckIn(res.data);
+      }
+    }
+  };
+  const hasCheckedInToday = () => {
+    const today = new Date().toISOString().split("T")[0];
+    return dataCheckIn.some((record) => record.date.split("T")[0] === today);
+  };
 
   const requestPermissions = async () => {
     try {
@@ -72,8 +95,8 @@ const CheckInPage = () => {
     }
   };
 
-  const startScanning = async () => {
-    if (videoElement.current && cameraPermissionGranted) {
+  const startScanning = async (isCheckIn: boolean) => {
+    if (videoElement.current) {
       if (!qrScanner) {
         const scanner = new QrScanner(
           videoElement.current,
@@ -82,7 +105,7 @@ const CheckInPage = () => {
               scanner.stop();
               setScanning(false);
               console.log("QR code detected:", result);
-              onDetect(result);
+              onDetect(result, isCheckIn);
               scanningRef.current = false;
             }
           },
@@ -121,30 +144,54 @@ const CheckInPage = () => {
     }
   };
 
-  const onDetect = async (content: any) => {
-    // to do call api checkIn here
-    console.log("🚀 ~ QR Code detected: ", content);
+  const onDetect = async (content: any, isCheckIn: boolean) => {
     setLoading(true);
 
-    navigator.geolocation.getCurrentPosition((pos) => {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
       const { latitude, longitude } = pos.coords;
-      console.log(latitude, longitude);
+      console.log("Latitude:", latitude, "Longitude:", longitude);
+
+      // Gọi OpenStreetMap API để lấy địa chỉ
       const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
-      fetch(url)
-        .then((res) => res.json())
-        .then((data) => {
-          if (showDialogSuccess.current) {
-            const currentDate = new Date();
+      const locationResponse = await fetch(url);
+      const locationData = await locationResponse.json();
+      console.log(
+        "🚀 ~ navigator.geolocation.getCurrentPosition ~ locationData:",
+        locationData
+      );
 
-            setTimeCheckIn(
-              `${currentDate.getHours()}:${currentDate.getMinutes()}`
-            );
-            setLoading(false);
+      // Lấy `userId` từ localStorage
+      const userId = localStorage.getItem("userData");
 
-            showDialogSuccess.current.showModal();
-          }
-          console.log("data", data);
-        });
+      console.log(
+        "🚀 ~ navigator.geolocation.getCurrentPosition ~ !userId:",
+        !userId
+      );
+      if (!userId) {
+        console.error("User ID is missing");
+        setLoading(false);
+        return;
+      }
+
+      // Gọi API check-in hoặc check-out
+      const apiUrl = isCheckIn ? "check/checkIn" : "check/checkOut";
+      const payload = {
+        userId: JSON.parse(userId)._id,
+        location: locationData?.display_name || "-",
+      };
+
+      const res = await axiosInstance.post(apiUrl, payload);
+
+      if (res.status === 200 && showDialogSuccess.current) {
+        setFlagIndex(+1);
+        const currentDate = new Date();
+
+        setTimeCheckIn(`${currentDate.getHours()}:${currentDate.getMinutes()}`);
+        setLoading(false);
+        showDialogSuccess.current.showModal();
+      } else {
+        setLoading(false);
+      }
     });
   };
 
@@ -155,7 +202,9 @@ const CheckInPage = () => {
       }
     };
   }, [qrScanner]);
-
+  const handleNavigateHome = () => {
+    navigate("/");
+  };
   return (
     <div>
       <div className="rounded-lg py-4 py-md-8 text-center text-md-left border border-solid border-gray-300 px-md-8">
@@ -166,17 +215,38 @@ const CheckInPage = () => {
         </div>
 
         {/* Button to start scanning */}
-        {!scanning && (
-          <div
-            className={`w-[120px] h-[40px] flex justify-center items-center gap-x-1.5 mt-4 mt-md-[23px] mx-auto mx-md-0 text-center text-sm rounded-lg bg-[#FE771B] text-white font-semibold cursor-pointer ${
-              !cameraPermissionGranted ? "cursor-not-allowed opacity-50" : ""
-            } `}
-            onClick={startScanning}
-          >
-            Check-in
-            <img src={cameraCheckIn} alt="camera" />
-          </div>
-        )}
+        <div className="w-full flex gap-3 md:flex-col">
+          {!scanning && (
+            <div
+              className={`w-[120px] h-[40px] flex justify-center items-center gap-x-1.5 mt-4 mt-md-[23px] mx-auto mx-md-0 text-center text-sm rounded-lg bg-[#FE771B] text-white font-semibold cursor-pointer ${
+                !cameraPermissionGranted ||
+                hasCheckedInToday() ||
+                flagIndex === 1
+                  ? "cursor-not-allowed pointer-events-none  opacity-50"
+                  : ""
+              } `}
+              onClick={() => {
+                startScanning(true);
+              }}
+            >
+              Check-in
+              <img src={cameraCheckIn} alt="camera" />
+            </div>
+          )}
+          {!scanning && (
+            <div
+              className={`w-[120px] h-[40px] flex justify-center items-center gap-x-1.5 mt-4 mt-md-[23px] mx-auto mx-md-0 text-center text-sm rounded-lg bg-[#FE771B] text-white font-semibold cursor-pointer ${
+                !cameraPermissionGranted ? "cursor-not-allowed opacity-50" : ""
+              } `}
+              onClick={() => {
+                startScanning(false);
+              }}
+            >
+              Check-out
+              <img src={cameraCheckIn} alt="camera" />
+            </div>
+          )}
+        </div>
         {!cameraPermissionGranted && (
           <div className="mt-3">
             <span>Bạn chưa cấp quyền truy cập camera và vị trí</span>
@@ -203,10 +273,15 @@ const CheckInPage = () => {
           <div className="flex w-full justify-center">
             <span>Bạn đã check-in thành công vào lúc: {timeCheckIn}</span>
           </div>
+          <div className="modal-action w-full flex justify-center">
+            <form method="dialog ">
+              {/* if there is a button in form, it will close the modal */}
+              <button className="btn" onClick={handleNavigateHome}>
+                Về trang chủ
+              </button>
+            </form>
+          </div>
         </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
       </dialog>
     </div>
   );

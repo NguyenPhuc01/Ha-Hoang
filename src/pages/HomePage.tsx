@@ -1,38 +1,31 @@
 import dayjs from "dayjs";
-import { UserData } from "../util/home.type";
+import { CheckInRecord } from "../util/home.type";
+import { useEffect, useState } from "react";
+import { axiosInstance } from "../lib/axios";
 
 const HomePage = () => {
+  const [dataCheckIn, setDataCheckIn] = useState<CheckInRecord[]>([]);
   // useEffect(() => {
   //   console.log("subbbbbbb");
 
   //   subscribeToMessage();
   //   return () => unsubscribeFromMessage();
   // }, [subscribeToMessage, unsubscribeFromMessage]);
-  const dataTest: UserData[] = [
-    {
-      id: 1,
-      name: "User 1",
-      timeCheckIn: "2024-12-17T01:55:29.243Z",
-      timeCheckOut: "2024-12-17T10:00:29.243Z",
-      locationCheckIn: "Location 1",
-      timeWorking: "2 hours",
-      imagePicture: "https://img.daisyui.com/images/profile/demo/2@94.webp",
-    },
-  ];
-  const generateDataFor30Days = (data: UserData[]) => {
-    const dataFor30Days: UserData[] = [];
-    for (let i = 0; i < 30; i++) {
-      const dayData = data.map((userData) => ({
-        ...userData, // sao chép dữ liệu từ `dataTest`
-        day: `Day ${i + 1}`, // thêm thông tin ngày
-      }));
-      dataFor30Days.push(...dayData);
+  useEffect(() => {
+    getListCheckIn();
+  }, []);
+  const getListCheckIn = async () => {
+    const userId = localStorage.getItem("userData");
+    if (userId) {
+      const res = await axiosInstance.get(
+        `check/listCheckIn/${JSON.parse(userId)._id}`
+      );
+      if (res.status === 200) {
+        setDataCheckIn(res.data);
+      }
     }
-    return dataFor30Days;
   };
 
-  const dataFor30Days = generateDataFor30Days(dataTest);
-  // Hàm lấy tất cả các ngày trong tháng với thứ tương ứng
   const getDaysInMonth = (year: number, month: number, currentDay: number) => {
     const startDate = new Date(year, month, 1);
     const endDate = new Date(year, month, currentDay);
@@ -75,7 +68,7 @@ const HomePage = () => {
           </thead>
           <tbody className="">
             {/* row 1 */}
-
+            {console.log("days", days)}
             {days.map((item, index) => {
               const reversedIndex = days.length - 1 - index;
               return (
@@ -95,29 +88,33 @@ const HomePage = () => {
                   </td>
                   <td>
                     <span className="badge badge-ghost badge-sm">
-                      {dayjs(dataFor30Days[reversedIndex]?.timeCheckIn).format(
-                        "HH:mm"
-                      )}
+                      {dataCheckIn[index]?.checkInTime
+                        ? dayjs(dataCheckIn[index]?.checkInTime).format("HH:mm")
+                        : "-"}
                     </span>
                   </td>
                   <td>
                     {" "}
                     <span className="badge badge-ghost badge-sm">
-                      {dayjs(dataFor30Days[reversedIndex]?.timeCheckOut).format(
-                        "HH:mm"
-                      )}
+                      {dataCheckIn[index]?.checkOutTime
+                        ? dayjs(dataCheckIn[index]?.checkOutTime).format(
+                            "HH:mm"
+                          )
+                        : "-"}
                     </span>
                   </td>
                   <th>
                     <span className="badge badge-ghost badge-sm">
-                      {dataFor30Days[reversedIndex]?.locationCheckIn}
+                      {dataCheckIn[index]?.location
+                        ? dataCheckIn[index]?.location
+                        : "-"}
                     </span>
                   </th>
                   <th>
                     <span className="badge badge-ghost badge-sm">
                       {calculateWorkingHours(
-                        dataFor30Days[reversedIndex]?.timeCheckIn,
-                        dataFor30Days[reversedIndex]?.timeCheckOut
+                        dataCheckIn[index]?.checkInTime,
+                        dataCheckIn[index]?.checkOutTime
                       )}
                     </span>
                   </th>
