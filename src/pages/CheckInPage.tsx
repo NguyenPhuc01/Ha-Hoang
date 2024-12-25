@@ -6,6 +6,7 @@ import { useLoading } from "../components/LoadingProvider";
 import { CheckInRecord } from "../util/home.type";
 import { axiosInstance } from "../lib/axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 const CheckInPage = () => {
   const videoElement = useRef<HTMLVideoElement | null>(null);
   const [qrScanner, setQrScanner] = useState<QrScanner | null>(null);
@@ -104,7 +105,6 @@ const CheckInPage = () => {
             if (scanningRef.current) {
               scanner.stop();
               setScanning(false);
-              console.log("QR code detected:", result);
               onDetect(result, isCheckIn);
               scanningRef.current = false;
             }
@@ -145,28 +145,23 @@ const CheckInPage = () => {
   };
 
   const onDetect = async (content: any, isCheckIn: boolean) => {
+    if (content.data !== "https://ha-hoang.vercel.app/") {
+      toast.error("Mã Qr không hợp lệ");
+      return;
+    }
     setLoading(true);
 
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const { latitude, longitude } = pos.coords;
-      console.log("Latitude:", latitude, "Longitude:", longitude);
 
       // Gọi OpenStreetMap API để lấy địa chỉ
       const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
       const locationResponse = await fetch(url);
       const locationData = await locationResponse.json();
-      console.log(
-        "🚀 ~ navigator.geolocation.getCurrentPosition ~ locationData:",
-        locationData
-      );
 
       // Lấy `userId` từ localStorage
       const userId = localStorage.getItem("userData");
 
-      console.log(
-        "🚀 ~ navigator.geolocation.getCurrentPosition ~ !userId:",
-        !userId
-      );
       if (!userId) {
         console.error("User ID is missing");
         setLoading(false);

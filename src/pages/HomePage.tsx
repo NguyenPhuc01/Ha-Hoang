@@ -67,8 +67,6 @@ const HomePage = () => {
             </tr>
           </thead>
           <tbody className="">
-            {/* row 1 */}
-            {console.log("days", days)}
             {days.map((item, index) => {
               const reversedIndex = days.length - 1 - index;
               return (
