@@ -44,13 +44,13 @@ const HomePage = () => {
 
   const today = dayjs();
   const days = getDaysInMonth(today.year(), today.month(), today.date());
-  const calculateWorkingHours = (checkIn: string, checkOut: string) => {
-    const checkInTime = dayjs(checkIn);
-    const checkOutTime = dayjs(checkOut);
+  // const calculateWorkingHours = (checkIn: string, checkOut: string) => {
+  //   const checkInTime = dayjs(checkIn);
+  //   const checkOutTime = dayjs(checkOut);
 
-    const duration = checkOutTime.diff(checkInTime, "hour", true); // Tính số giờ, có phần thập phân nếu có
-    return duration.toFixed(2); // Return the duration as a string with two decimal places
-  };
+  //   const duration = checkOutTime.diff(checkInTime, "hour", true); // Tính số giờ, có phần thập phân nếu có
+  //   return duration.toFixed(2); // Return the duration as a string with two decimal places
+  // };
   return (
     <div className="h-full bg-base-200">
       <div className="overflow-x-auto ">
@@ -109,10 +109,9 @@ const HomePage = () => {
                   </th>
                   <th>
                     <span className="badge badge-ghost badge-sm">
-                      {calculateWorkingHours(
-                        dataCheckIn[index]?.checkInTime,
-                        dataCheckIn[index]?.checkOutTime
-                      )}
+                      {dataCheckIn[index]?.totalHours
+                        ? dataCheckIn[index]?.totalHours
+                        : "0"}
                     </span>
                   </th>
                 </tr>
