@@ -21,7 +21,7 @@ const HomePage = () => {
         `check/listCheckIn/${JSON.parse(userId)._id}`
       );
       if (res.status === 200) {
-        setDataCheckIn(res.data);
+        setDataCheckIn(res.data.reverse());
       }
     }
   };
@@ -68,9 +68,8 @@ const HomePage = () => {
           </thead>
           <tbody className="">
             {days.map((item, index) => {
-              const reversedIndex = days.length - 1 - index;
               return (
-                <tr className="" key={reversedIndex}>
+                <tr className="" key={index}>
                   <th></th>
                   <td>
                     <div className="flex items-center gap-3">
